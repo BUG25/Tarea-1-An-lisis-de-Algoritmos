@@ -1,3 +1,5 @@
+import numpy as np
+
 def brute_force(A,B):
     n1,n2,n3 = A.shape[0], A.shape[1], B.shape[1]  # n1,n2,n3 = filas A, columnas A = filas B, columnas B
     C = np.array([[0]*n3 for i in range(n1)])      # C un array de n1*n3 lleno de ceros

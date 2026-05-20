@@ -19,7 +19,7 @@
 
 #include "utils.cpp"
 // #include NOMBRE DE LA FUNCIÓN A MEDIR}
-#include skibidisigma.py
+#include Divide&Kongquer.py
 
 // Include to be tested files here
 
@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
             begin_time = std::chrono::high_resolution_clock::now();
 
             // FUNCTION TO TEST GOES HERE
-            skibidisigma();
+            Divide&Kongquer.strassen(A,B);
 
             end_time = std::chrono::high_resolution_clock::now();
 
