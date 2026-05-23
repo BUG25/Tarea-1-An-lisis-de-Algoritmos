@@ -20,7 +20,7 @@
 
 #include "utils.cpp"
 // #include NOMBRE DE LA FUNCIÓN A MEDIR}
-
+#include "Strassen.cpp"
 // Include to be tested files here
 
 int main(int argc, char *argv[])
@@ -58,6 +58,14 @@ int main(int argc, char *argv[])
         time_stdev = 0;
 
         // Test configuration goes here
+        Matrix A = create_matrix(n, n);
+        Matrix B = create_matrix(n, n);
+        for (size_t i = 0; i < n; i++) {
+        for (size_t j = 0; j < n; j++) {
+            A.data[i][j] = u_distr(rng);  // usar tu generador aleatorio
+            B.data[i][j] = u_distr(rng);
+        }
+        }
 
         // Run to compute elapsed time
         for (i = 0; i < runs; i++) {
@@ -67,9 +75,14 @@ int main(int argc, char *argv[])
             begin_time = std::chrono::high_resolution_clock::now();
 
             // FUNCTION TO TEST GOES HERE
-            system("python3 Divide&Kongquer.py");
+            Matrix C = strassen(A, B);
+
 
             end_time = std::chrono::high_resolution_clock::now();
+
+            free_matrix(A);
+            free_matrix(B);
+            free_matrix(C);
 
             elapsed_time = end_time - begin_time;
             times[i] = elapsed_time.count();
