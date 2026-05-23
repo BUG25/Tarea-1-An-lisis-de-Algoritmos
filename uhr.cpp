@@ -16,10 +16,10 @@
 #include <iostream>
 #include <random>
 #include <vector>
+#include <cstdlib>
 
 #include "utils.cpp"
 // #include NOMBRE DE LA FUNCIÓN A MEDIR}
-#include Divide&Kongquer.py
 
 // Include to be tested files here
 
@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
             begin_time = std::chrono::high_resolution_clock::now();
 
             // FUNCTION TO TEST GOES HERE
-            Divide&Kongquer.strassen(A,B);
+            system("python3 Divide&Kongquer.py");
 
             end_time = std::chrono::high_resolution_clock::now();
 
