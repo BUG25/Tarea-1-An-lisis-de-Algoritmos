@@ -42,7 +42,7 @@ Matrix join_matrices(const Matrix& a, const Matrix& b, const Matrix& c, const Ma
 
 // Algoritmo de Strassen
 Matrix strassen(const Matrix& A, const Matrix& B) {
-    if (A.rows <= 2) {
+    if (A.rows == 1) {
         return brute_force(A, B);
     }
     
