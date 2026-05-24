@@ -1,0 +1,261 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+\usepackage{lipsum}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage[margin=3cm]{geometry}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\usepackage{booktabs}
+\usepackage{multirow}
+\pgfplotsset{compat=1.18}
+\date{25 de mayo de 2026}
+
+\lstset { %
+    language=C++,
+    backgroundcolor=\color{black!5}, % set backgroundcolor
+    basicstyle=\footnotesize,% basic font setting
+}
+\begin{document}
+\title{Análisis de Algoritmos \\ Tarea 1}
+%\date{18 de Abril 2025  [2025-04-18 Fri]} 
+\author{Hugo Flores Velásquez \\ Mario \\ Luigi}
+
+\maketitle
+
+
+\section{Fuerza Bruta}
+
+\subsection{Implementación}
+  Se implementó un algoritmo de fuerza bruta para resolver el problema de la distancia mínima entre puntos en el plano. Este algoritmo recorre todos los pares posibles de puntos en el conjunto de entrada y calcula la distancia euclidiana entre ellos. Luego, selecciona y guarda la distancia mínima encontrada.\\
+
+El algoritmo sigue los siguientes pasos:
+
+\begin{enumerate}
+    \item Inicializa la distancia mínima con un valor infinito.
+    \item Recorre todos los pares posibles de puntos $(p_i, p_j)$ donde $i < j$.
+    \item Calcula la distancia euclidiana entre cada par.
+    \item Si la distancia actual es menor que la mínima registrada, la actualiza.
+    \item Al terminar todas las comparaciones, retorna la menor distancia encontrada.
+\end{enumerate}
+
+
+\subsection{Correctitud}
+
+\textbf{Invariante del ciclo}
+
+El algoritmo de fuerza bruta compara todas las distancias entre pares de puntos y mantiene en \texttt{minDist} la menor encontrada.\\
+
+\textbf{Invariante:} Después de cada iteración del bucle, \texttt{minDist} contiene la distancia mínima entre los puntos procesados hasta ese momento.\\
+
+
+\textbf{Correctitud:} 
+\begin{itemize}
+    \item Al inicio, \texttt{minDist} es infinito, por lo que cualquier distancia válida puede actualizarlo.
+    \item En cada iteración, se compara el nuevo punto con los anteriores y se actualiza \texttt{minDist} si corresponde.
+    \item Al finalizar, \texttt{minDist} almacena la menor distancia entre todos los pares.
+\end{itemize}
+
+Por lo tanto, el algoritmo es correcto y la invariante asegura su funcionamiento paso a paso.
+
+\subsection{Complejidad Computacional}
+
+El algoritmo de fuerza bruta recorre todos los pares posibles de puntos para calcular la distancia entre ellos. Supongamos que la entrada es un conjunto $S$ de $n$ puntos.\\
+
+\textbf{Análisis del algoritmo:}
+
+\begin{itemize}
+    \item El algoritmo tiene un ciclo externo que itera $i$ desde $0$ hasta $n - 1$.
+    \item Dentro de ese ciclo, hay otro ciclo interno que itera $j$ desde $i + 1$ hasta $n - 1$.
+    \item Por lo tanto, se calcula la distancia para cada par de puntos una única vez.
+\end{itemize}
+
+El número total de pares de puntos distintos es:
+
+\[
+\sum_{i=0}^{n-2} \sum_{j=i+1}^{n-1} 1 = \binom{n}{2} = \frac{n(n-1)}{2}
+\]
+
+Esto implica que el algoritmo realiza un número de comparaciones del orden de \( \mathcal{O}(n^2) \).\\
+
+\textbf{Costo de cada operación:}  
+Cada distancia se calcula usando la fórmula:
+
+\[
+\text{dist}(a, b) = \sqrt{(x_a - x_b)^2 + (y_a - y_b)^2}
+\]
+
+Esta operación tiene un costo constante, es decir, \( \mathcal{O}(1) \).\\
+
+\textbf{Conclusión:}  
+Como se realizan \( \mathcal{O}(n^2) \) iteraciones y cada una cuesta \( \mathcal{O}(1) \), la complejidad total del algoritmo es:
+
+\[
+\boxed{\mathcal{O}(n^2)}
+\]
+
+Esto significa que el tiempo de ejecución crece cuadráticamente respecto al número de puntos de entrada, lo cual lo hace poco eficiente para valores grandes de \( n \).
+
+  
+\section{Dividir para Vencer}
+
+\subsection{Diseño e Investigación}
+
+
+Antes de comenzar con la implementación del algoritmo \texttt{divide\_conquer}, se ha realizado una investigación en internet para buscar algoritmos de este estilo ya creados. Dentro de esta investigación, se han llegado a dos principales conclusiones;
+\begin{itemize}
+    \item Los algoritmos divide and conquer más refinados emplean un brute force interno.
+    \item Los algoritmos divide and conquer tienden a ser una mejora sobre el brute force solitario en cuanto a complejidad temporal, alcanzando una complejidad temporal de $O(n \log n)$.
+\end{itemize}
+Dado el requisito de este trabajo de crear un divide and conquer con complejidad temporal $O(n^2)$. Se decidió no usar directamente estos algoritmos más avanzados, y en su lugar crear uno nuevo, más simple, con complejidad temporal $O(n^2)$ y empleando la idea de usar un brute force interno. 
+  
+\subsection{Implementación}
+
+El algoritmo \texttt{divide\_conquer} emplea 4 funciones principales; con la primera, la función distancia, siendo la que realiza el cálculo de la distancia euclidiana entre dos puntos usando la fórmula vista en el punto 1.3, y la segunda, fuerzaBruta, siendo también una reimplementación basada en el algoritmo explicado en el punto 1.1.
+
+La función principal del algoritmo es la función divideconquer, la cual sigue el siguiente proceso de forma recursiva;
+\begin{enumerate}
+    \item Comprueba si el número de puntos totales es mayor que 3, de no serlo, utiliza fuerzaBruta para obtener el resultado.
+    \item Si se tienen más de 3 puntos, estos se dividen en dos mitades.
+    \item Se llama nuevamente a la función en cada mitad.
+    \item Se retorna la menor distancia en ambas mitades.
+\end{enumerate}
+Finalmente, la función distanciaMinina es la que recibe el vector de puntos, los ordena según su coordenada X, y les aplica divideconquer para retornar la distancia mínima deseada.
+
+\subsection{Correctitud}
+Demostramos usando inducción matemática;\\
+
+Sea P(n) la afirmación de que para todo conjunto de \( n > 1 \) puntos, el algoritmo devuelve la distancia mínima entre todos los pares de puntos en el conjunto.\\
+
+Como caso base, tenemos que para \( n < 4 \), fuerzaBruta compara todos los pares de puntos en estos conjuntos, y dado que ya se ha demostrado por invariante de ciclo en el punto 1.2 que fuerza bruta es correcto, podemos concluir que P(n) es correcto en este caso base.\\
+
+Para nuestro paso inductivo:
+
+Supongamos que P(k) es verdadera para todo \( k < n \), con \( n > 4 \).
+Queremos demostrar que P(n) es cierta en este caso.\\
+
+Tenemos que:\\
+El algoritmo divide el rango de puntos en distIzq y distDer.
+Por hipótesis inductiva, distIzq contiene la distancia mínima entre los puntos de la mitad izquierda, así como distDer los de la derecha.
+
+Luego, al algoritmo retorna el mínimo entre distIzq y distDer, la cual es por construcción la menor distancia entre puntos en la misma mitad, dado que no se compara ningún par de puntos cruzados (uno de izquierda con uno de derecha).\\
+
+Por ende, nuestra conclusión inductiva es que nuestro algoritmo devuelve correctamente la menor distancia entre puntos que están dentro del mismo subrango, lo cual implica que, P(n) debe ser verdadera para todo n.
+
+
+\subsection{Complejidad Computacional}
+\textbf{Paso 1: Definir la recurrencia}
+
+\begin{itemize}
+  \item El algoritmo divide el problema en dos mitades de tamaño aproximadamente \( \frac{n}{2} \).
+  \item Llama recursivamente a sí mismo para resolver ambas mitades.
+  \item Fuera de las llamadas recursivas, solo se calcula el mínimo de dos valores, lo cual es \( O(1) \).
+\end{itemize}
+
+Entonces, la recurrencia es:
+
+\[
+T(n) = 2T\left(\frac{n}{2}\right) + O(1)
+\]
+
+\textbf{Paso 2: Aplicar el Teorema Maestro}
+
+La recurrencia es:
+
+\[
+T(n) = 2T\left(\frac{n}{2}\right) + O(1)
+\]
+
+Comparando con el Teorema Maestro:
+
+\begin{itemize}
+  \item \( a = 2 \)
+  \item \( b = 2 \)
+  \item \( f(n) = O(1) \)
+  \item \( \log_b a = \log_2 2 = 1 \)
+\end{itemize}
+
+Como \( f(n) = O(n^{\log_b a - \varepsilon}) = O(n^{1 - \varepsilon}) \), se cumple el \textbf{Caso 1} del Teorema Maestro:
+
+\[
+T(n) = \Theta(n)
+\]
+
+\textbf{Paso 3: ¿Entonces por qué la complejidad real es \( O(n^2) \)?}
+
+Dado que el algoritmo no compara puntos entre mitades, La única forma segura de obtener la respuesta correcta en algunos casos es mediante fuerza bruta, comparando todos los pares posibles de puntos, lo cual como ya comprobamos en el punto 1.2, requiere tiempo  \( \boxed{O(n^2)} \)
+  
+\section{Análisis Experimental }
+
+\subsection{Strassen}
+
+\subsubsection{Diseño experimental}
+
+Para evaluar el algoritmo de Strassen, se generaron cuatro tipos de matrices cuadradas de tamaño \(n\) (potencias de dos desde \(n=1\) hasta \(n=256\) con paso 32, obteniendo los tamaños \(1,33,65,97,129,161,193,225\)):
+
+\begin{enumerate}
+    \item \textbf{Enteros aleatorios}: valores enteros distribuidos uniformemente en el rango de enteros de 64 bits.
+    \item \textbf{Reales aleatorios}: valores reales en el intervalo \([0,1)\) generados con una distribución uniforme.
+    \item \textbf{Matriz identidad}: \(A_{i,j}=1\) si \(i=j\), \(0\) en caso contrario; ambas matrices iguales.
+    \item \textbf{Matrices constantes}: \(A\) llena de \(2.0\) y \(B\) llena de \(3.0\).
+\end{enumerate}
+
+Cada experimento se repitió \(32\) veces por cada tamaño \(n\) para garantizar estabilidad estadística. Se midió el tiempo promedio de ejecución, la desviación estándar y los cuartiles usando la suite \texttt{uhr} proporcionada. Todas las ejecuciones se realizaron en la misma máquina (especificar aquí CPU, RAM, SO, versión del compilador).
+
+\subsubsection{Realización}
+
+Se implementó el algoritmo de Strassen tal como se describe en la sección de diseño, con caso base \(n=1\) y utilizando las siete multiplicaciones recursivas definidas por las matrices \(M_1\) a \(M_7\). La complejidad teórica es \(\Theta(n^{\log_2 7}) \approx \Theta(n^{2.81})\).
+
+Los resultados se registraron en archivos CSV separados para cada tipo de matriz:
+\begin{itemize}
+    \item \texttt{int\_random.csv}: enteros aleatorios.
+    \item \texttt{real\_random.csv}: reales aleatorios.
+    \item \texttt{identity.csv}: matriz identidad.
+    \item \texttt{constant.csv}: matrices constantes.
+\end{itemize}
+
+En la Figura~\ref{fig:strassen} se muestran las curvas de tiempo promedio en escala log-log para los cuatro tipos de matrices, junto con la curva teórica \(\Theta(n^{2.81})\) ajustada por un factor constante. Se observa que el comportamiento empírico sigue la tendencia esperada, aunque con diferencias en los valores absolutos debidas a la sobrecarga de la recursión y la manipulación de memoria.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{strassen_plot.png}
+\caption{Tiempo de ejecución del algoritmo de Strassen para diferentes tipos de matrices. Escala log-log.}
+\label{fig:strassen}
+\end{figure}
+
+Los tiempos para matrices identidad y constantes son ligeramente menores que para matrices aleatorias, probablemente porque los patrones regulares permiten cierto grado de predicción en el acceso a memoria y en las operaciones aritméticas. Las desviaciones estándar reportadas son en general pequeñas en relación con la media, lo que indica baja variabilidad entre repeticiones.
+    
+\section{Resultados} 
+
+Responder estas preguntas:
+
+Argumente sus respuestas en el informe, pero no es necesario programar soluciones para esta sección.
+3.1 Discuta los resultados obtenidos en los experimentos. ¿Se ajusta la teoría a la ejecución práctica?
+En caso de haber diferencias, qué podría explicar estos fenómenos?
+3.2 Proponga formas de extender los algoritmos anteriores para que funcionen para valores genéricos
+n1, n2 y n3. Discuta cómo afectarían estas modificaciones a la complejidad asintótica y a los
+tiempos de ejecución.
+3.3 ¿Cuál es la mejor complejidad asintótica conocida a día de hoy para multiplicar matrices? Qué
+algoritmos se usan en la práctica (en librerías con algoritmos numéricos y manejo de matrices)?
+
+\section{Gráfico} 
+ \begin{figure}[H]
+ \centering
+   \includegraphics[width=1\textwidth]{plot.png}
+  \caption{Tiempo de ejecución de de los 4 algoritmos implementados.}\label{fig:fourAlgorithms}
+  \end{figure}
+
+
+
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
+

@@ -16,11 +16,9 @@
 #include <iostream>
 #include <random>
 #include <vector>
-#include <cstdlib>
 
 #include "utils.cpp"
-// #include NOMBRE DE LA FUNCIÓN A MEDIR}
-#include "Strassen.hpp"
+
 // Include to be tested files here
 
 int main(int argc, char *argv[])
@@ -58,40 +56,20 @@ int main(int argc, char *argv[])
         time_stdev = 0;
 
         // Test configuration goes here
-        Matrix A_template = create_matrix(n, n);
-        Matrix B_template  = create_matrix(n, n);
-
-        for (size_t i = 0; i < n; i++) {
-            for (size_t j = 0; j < n; j++) {
-                A_template.data[i][j] = u_distr(rng);  // usar tu generador aleatorio
-                B_template.data[i][j] = u_distr(rng);
-            }
-        }
 
         // Run to compute elapsed time
         for (i = 0; i < runs; i++) {
             // Remember to change total depending on step type
             display_progress(++executed_runs, total_runs_additive);
 
-            Matrix A = copy_matrix(A_template);
-            Matrix B = copy_matrix(B_template);
-
             begin_time = std::chrono::high_resolution_clock::now();
-
-            // FUNCTION TO TEST GOES HERE
-            Matrix C = strassen(A, B);
-
-
+            // Function to test goes here
             end_time = std::chrono::high_resolution_clock::now();
 
             elapsed_time = end_time - begin_time;
             times[i] = elapsed_time.count();
 
             mean_time += times[i];
-
-            free_matrix(A);
-            free_matrix(B);
-            free_matrix(C);
         }
 
         // Compute statistics
