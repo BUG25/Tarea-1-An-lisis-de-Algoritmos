@@ -6,4 +6,4 @@
 
 Matrix hybrid_multiply(const Matrix& A, const Matrix& B);
 
-#endif // HYBRID_HPP
+#endif
