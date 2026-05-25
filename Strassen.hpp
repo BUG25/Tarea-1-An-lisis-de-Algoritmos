@@ -1,37 +1,28 @@
-// * RECORDAR: no se pueden usar fokin librerías de multiplicación de matrices! debemos implementarlo nosotro!!!!!!!
-// n es múltiplo de 2
-// si n=1, se hace la multiplicación directamente
-
 #ifndef STRASSEN_HPP
 #define STRASSEN_HPP
 
 #include "BruteForce.hpp"
 
-// ALGORITMO DE STRASEEN
-
-// dividimos las matrices en matrices más enanas
+// Dividir matriz en 4 submatrices
 void split_matrix(const Matrix& M, Matrix& a, Matrix& b, Matrix& c, Matrix& d) {
     size_t half = M.rows / 2;
     
-    // dividimos en 4 submatrice
-    // creamos matrices vacías
     a = create_matrix(half, half);
     b = create_matrix(half, half);
     c = create_matrix(half, half);
     d = create_matrix(half, half);
     
-    //copiamos datos a estos 4 cuartos de matrix
     for (size_t i = 0; i < half; i++) {
         for (size_t j = 0; j < half; j++) {
-            a.data[i][j] = M.data[i][j];                  // 1ra matriz, filas de 0 a n//2, columnas de 0 a n//2
-            b.data[i][j] = M.data[i][j + half];          // 2da matriz, filas de 0 a n//2, columnas de n//2 a n
-            c.data[i][j] = M.data[i + half][j];         // 3ra matriz, filas de n//2 a n, columnas de 0 a n//2
-            d.data[i][j] = M.data[i + half][j + half]; // 4ta matriz, filas de n//2 a n, columnas de n//2 a n
+            a.data[i][j] = M.data[i][j];
+            b.data[i][j] = M.data[i][j + half];
+            c.data[i][j] = M.data[i + half][j];
+            d.data[i][j] = M.data[i + half][j + half];
         }
     }
 }
 
-// Unimos submatrices
+// Unir 4 submatrices en una matriz
 Matrix join_matrices(const Matrix& a, const Matrix& b, const Matrix& c, const Matrix& d) {
     size_t half = a.rows;
     size_t full = half * 2;
@@ -49,78 +40,65 @@ Matrix join_matrices(const Matrix& a, const Matrix& b, const Matrix& c, const Ma
     return M;
 }
 
-Matrix strassen(const Matrix& A, const Matrix& B) {
-    if (A.rows == 1) {  // si n=1 se hace la multiplicación directamente
+// Algoritmo de Strassen
+Matrix strassen(const Matrix& A, const Matrix& B, size_t n0) {
+    if(A.rows <= n0) {
         return brute_force(A, B);
     }
 
+    if (A.rows == 1) {
+        return brute_force(A, B);
+    }
+    
+    // Dividir matrices A y B
     Matrix a, b, c, d;
     Matrix e, f, g, h;
     split_matrix(A, a, b, c, d);
     split_matrix(B, e, f, g, h);
     
-    // Podríamos calcular con strassen los siguientes productos:
-    // ae = strassen(a,e)
-    // bg = strassen(b,g)
-    // af = strassen(a,f)
-    // bh = strassen(b,h)
-    // ce = strassen(c,e)
-    // dg = strassen(d,g)
-    // cf = strassen(c,f)
-    // dh = strassen(d,h)
-    // y luego C11, C12, C21, C22    
-    // y unirlas en una sola matriz C  
-    // Tendríamos 8 llamaMdas a strassen de complejidaMd T(n/2), y cinco operaciones de complejidaMd Theta(n^2) 
-    // T(n) = 8T(n/2) + Theta(n^2) => T(n) = Theta(n^3) por teorema maestro
-    // El problema es que Brute Force tiene la misma complejidaMd temporal, lo que hace inoca la implementación de algoritmo de Strassen
-    // Por tanto, podemos reescribir de manera tal que:
-    // 1. ae+bg = ae+ah+de+dh+dg-de-ah-bh+bg+bh-dg-dh = (a+d)(e+h)+d(g-e)-(a+b)h+(b-d)(g+h)
-    // 2. af+bh = af-ah+ah+bh = a(f-h)+h(a+b)
-    // 3. ce+dg = ce+de+dg-de = e(c+d)+d(g-e)
-    // 4. cf+dh = af-ah+ae+ah+de+dh-ce-de-ae-af+ce+cf = a(f-h)+(a+d)(e+h)-e(c+d)-(a-c)(e+f)
-    // Con estas expresiones, podemos definir:
-    
+    // Calcular los 7 productos de Strassen
     // p1 = (a+d)(e+h)
-    Matrix aMd = add_matrix(a, d);  // a+d
-    Matrix eMh = add_matrix(e, h);  // e+h
-    Matrix p1 = strassen(aMd, eMh);
-    free_matrix(aMd);
-    free_matrix(eMh);
+    Matrix a_plus_d = add_matrix(a, d);
+    Matrix e_plus_h = add_matrix(e, h);
+    Matrix p1 = strassen(a_plus_d, e_plus_h, n0);
+    free_matrix(a_plus_d);
+    free_matrix(e_plus_h);
     
     // p2 = d(g-e)
-    Matrix gme = subtract_matrix(g, e);  // g-e
-    Matrix p2 = strassen(d, gme);
-    free_matrix(gme);
+    Matrix g_minus_e = subtract_matrix(g, e);
+    Matrix p2 = strassen(d, g_minus_e, n0);
+    free_matrix(g_minus_e);
     
     // p3 = (a+b)h
-    Matrix aMb = add_matrix(a, b);  // a+b
-    Matrix p3 = strassen(aMb, h);
-    free_matrix(aMb);
+    Matrix a_plus_b = add_matrix(a, b);
+    Matrix p3 = strassen(a_plus_b, h, n0);
+    free_matrix(a_plus_b);
     
     // p4 = (b-d)(g+h)
-    Matrix bmd = subtract_matrix(b, d);
-    Matrix gMh = add_matrix(g, h);
-    Matrix p4 = strassen(bmd, gMh);
-    free_matrix(bmd);
-    free_matrix(gMh);
+    Matrix b_minus_d = subtract_matrix(b, d);
+    Matrix g_plus_h = add_matrix(g, h);
+    Matrix p4 = strassen(b_minus_d, g_plus_h, n0);
+    free_matrix(b_minus_d);
+    free_matrix(g_plus_h);
     
     // p5 = a(f-h)
-    Matrix fmh = subtract_matrix(f, h);
-    Matrix p5 = strassen(a, fmh);
-    free_matrix(fmh);
+    Matrix f_minus_h = subtract_matrix(f, h);
+    Matrix p5 = strassen(a, f_minus_h, n0);
+    free_matrix(f_minus_h);
     
     // p6 = (c+d)e
-    Matrix cMd = add_matrix(c, d);
-    Matrix p6 = strassen(cMd, e);
-    free_matrix(cMd);
+    Matrix c_plus_d = add_matrix(c, d);
+    Matrix p6 = strassen(c_plus_d, e, n0);
+    free_matrix(c_plus_d);
     
     // p7 = (a-c)(e+f)
-    Matrix amc = subtract_matrix(a, c);
-    Matrix eMf = add_matrix(e, f);
-    Matrix p7 = strassen(amc, eMf);
-    free_matrix(amc);
-    free_matrix(eMf);
+    Matrix a_minus_c = subtract_matrix(a, c);
+    Matrix e_plus_f = add_matrix(e, f);
+    Matrix p7 = strassen(a_minus_c, e_plus_f, n0);
+    free_matrix(a_minus_c);
+    free_matrix(e_plus_f);
     
+    // Calcular las 4 submatrices resultado
     // C11 = p1 + p2 - p3 + p4
     Matrix temp1 = add_matrix(p1, p2);
     Matrix temp2 = subtract_matrix(temp1, p3);
@@ -141,7 +119,7 @@ Matrix strassen(const Matrix& A, const Matrix& B) {
     free_matrix(temp3);
     free_matrix(temp4);
     
-    // se unen las 4 submatrices
+    // Unir las 4 submatrices
     Matrix C = join_matrices(C11, C12, C21, C22);
     
     // Liberar memoria de submatrices y productos intermedios
@@ -151,10 +129,6 @@ Matrix strassen(const Matrix& A, const Matrix& B) {
     free_matrix(p5); free_matrix(p6); free_matrix(p7);
     free_matrix(C11); free_matrix(C12); free_matrix(C21); free_matrix(C22);
     
-    // De esta manera T(n) = 7T(n/2) + Theta(n^2) que por teorema maestro es Theta(n^2.81)
-    // Esto es mejor que Theta(n^3) de Brute Force, 
-    // por lo tanto, el algoritmo de Strassen es más eficiente que el algoritmo de Brute Force.//
-
     return C;
 }
 
